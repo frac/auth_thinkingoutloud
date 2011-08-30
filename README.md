@@ -61,15 +61,15 @@ The user provides an username that is tested for uniqueness as a database constr
 
 The user also provides a password. The password will be tested for:
 
-   Minimum size 
+  Minimum size 
 
 Registering process is:
 
-    We randomly generate a salt. 
+  #We randomly generate a salt. 
     
-    Then we mix the salt with the password provided and hash it using md5. 
-
-    We finally store the salt and hashed password in the database.
+  #Then we mix the salt with the password provided and hash it using md5. 
+ 
+  #We finally store the salt and hashed password in the database.
 
 The idea behind this salt and password is that we are not as vulnerable to precomputed rainbow tables.
 
