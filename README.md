@@ -59,7 +59,9 @@ Registering
 
 The user provides an username that is tested for uniqueness as a database constrain. Using a database constrain assures us that the database will deal with problems like concurrency and race conditions that might occur from multiple users trying to register the same login at the same time.
 
-The user also provides a password.
+The user also provides a password. The password will be tested for:
+
+   Minimum size 
 
 Registering process is:
 
@@ -69,6 +71,9 @@ Registering process is:
 
     We finally store the salt and hashed password in the database.
 
+The idea behind this salt and password is that we are not as vulnerable to precomputed rainbow tables.
+
+ 
 
  
 
