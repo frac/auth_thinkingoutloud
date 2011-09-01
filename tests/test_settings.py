@@ -12,3 +12,5 @@ class SettingsTest(unittest.TestCase):
 
         self.assertTrue(hasattr(settings, "PROJECT_PATH"))
         self.assertTrue(hasattr(settings, "DATABASE_PATH"))
+        self.assertTrue(hasattr(settings, "EMAIL_HOST"))
+        self.assertTrue(hasattr(settings, "EMAIL_FROM"))

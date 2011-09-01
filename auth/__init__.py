@@ -1,6 +1,6 @@
 
 
-from register import register
+from registering import register
 
     
 

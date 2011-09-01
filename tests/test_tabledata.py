@@ -28,9 +28,9 @@ class DatabaseTest(unittest.TestCase):
         """
         cur = self.conn.cursor()
         try:
-            cur.execute('select id, login, salt, password from users')
-        except self.conn.OperationalError:
-            self.fail("user table does not contain id column")
+            cur.execute('select id, email, salt, password, created, token, activated from users')
+        except self.conn.OperationalError, e:
+            self.fail("user table: %s"% e)
  
     
 

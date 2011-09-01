@@ -52,29 +52,40 @@ But, I am placing all sql specific code inside a dbutils file so that later it c
 User table
 -----------
 
-Basic user data that I am storing is username, hashed password and salt.
+Basic user data that I am storing is email, hashed password and salt.
 
 Registering
 -----------
 
-The user provides an username that is tested for uniqueness as a database constrain. Using a database constrain assures us that the database will deal with problems like concurrency and race conditions that might occur from multiple users trying to register the same login at the same time.
+The user provides an email that is tested for uniqueness as a database constrain. Using a database constrain assures us that the database will deal with problems like concurrency and race conditions that might occur from multiple users trying to register the same login at the same time.
+
+The email will be also validated against the following rules
+
+  * no spaces
+
+  * only letters, numbers and ".-_%" in the username
+  
+  * only letters, numbers and ".-" in the domain 
+  
+  * The top level domain (TLD) should exist and have between 2 and 4 letters 
 
 The user also provides a password. The password will be tested for:
 
-  Minimum size 
+  * Minimum size of 6 characters 
 
 Registering process is:
 
   * We randomly generate a salt. 
     
-  * Then we mix the salt with the password provided and hash it using SHA. 
+  * Then we mix the salt with the password provided and hash it using SHA1. 
  
   * We finally store the salt and hashed password in the database.
 
 The idea behind this salt and password is that we are not as vulnerable to precomputed rainbow tables.
 
-Using SHA lets us be platform independent, if we used some database specific crypt method changing databases would be more of a challenge. The way it is we can quickly convert the data for all of the major databases.
+Using SHA1 lets us be platform independent, if we used some database specific crypt method changing databases would be more of a challenge. The way it is we can quickly convert the data for all of the major databases.
 
+Also during the register process a 16 char token will be generated and sent in a email.
  
 
  
