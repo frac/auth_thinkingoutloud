@@ -7,16 +7,15 @@ class NotificationTest(unittest.TestCase):
     """
     See if the notifications works
 
-    """ 
+    """
     def setUp(self):
-       pass 
+        pass
 
     def test_base_props(self):
         """
         is there the method we want
         """
         self.assertTrue(hasattr(notifications, "send_new_user_notification"))
-
 
     @fudge.patch('smtplib.SMTP')
     def test_mailer(self, FakeSMTP):
@@ -27,4 +26,3 @@ class NotificationTest(unittest.TestCase):
                  .expects('quit'))
 
         notifications.send_new_user_notification("foo@bar.com", "abcdefghij")
-

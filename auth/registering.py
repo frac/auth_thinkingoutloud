@@ -1,16 +1,12 @@
-import random, string
 from hashlib import sha1
 import re
 
 from dbutils import DB
 from notifications import send_new_user_notification
+from utils import create_token
 
 def get_salt():
-    """
-    Uses only letters and numbers for the salt.
-    """
-    available_chars = string.letters + string.digits 
-    return ''.join( random.choice(available_chars) for _ in xrange(32))
+    return create_token()
     
 
 
@@ -44,7 +40,7 @@ def register(email, password):
         return (False, "Invalid password") 
 
     salt = get_salt()
-    token = get_salt()[:16].lower()
+    token = create_token().lower()
     
     m = sha1()
     m.update(salt + password)

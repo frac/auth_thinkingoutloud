@@ -1,6 +1,8 @@
 import settings
 import sqlite3
 from datetime import datetime
+from datetime import timedelta
+from utils import create_token
 
 """
 This is a wrapper for a simple sqlite3 database.
@@ -26,8 +28,10 @@ class DB(object):
                                     salt text, 
                                     password text,
                                     created timestamp,
-                                    token text,
-                                    activated timestamp 
+                                    token text UNIQUE,
+                                    activated timestamp,
+                                    tries INTEGER default 0, 
+                                    auth_token text UNIQUE
                         )""")
 
         conn.commit()
@@ -45,4 +49,58 @@ class DB(object):
             return (True, "Success")
         except conn.IntegrityError:
             return (False, "Fail")
+
+    def get_user_by_token(self, token):
+        conn = self.get_connection()
+        cur = conn.cursor()
+        cur.execute('SELECT created, token, activated from users where token = ? ', (token,))
+    
+        return cur.fetchall()
+
+    def activate_user(self, token):
+        conn = self.get_connection()
+        cur = conn.cursor()
+        cur.execute('update users set activated = ? where token = ? and activated is NULL ', (datetime.now(),token,))
+        conn.commit() 
+
+    def get_user_by_email(self, email):
+        conn = self.get_connection()
+        cur = conn.cursor()
+        cur.execute('SELECT salt, password, activated, tries from users where email = ? ', (email,))
+    
+        return cur.fetchall()
+
+    def failed_login(self, email):
+        conn = self.get_connection()
+        cur = conn.cursor()
+        cur.execute('update users set tries = tries + 1 where email = ? ', (email,))
+        conn.commit() 
+
+    def successful_login(self, email):
+        conn = self.get_connection()
+        auth_token = create_token()
+        cur = conn.cursor()
+        cur.execute('update users set tries = 0, auth_token=? where email = ? ', (auth_token,email,))
+        conn.commit() 
+        return auth_token
+    
+    def get_user_by_auth_token(self, auth_token):
+        conn = self.get_connection()
+        cur = conn.cursor()
+        cur.execute('SELECT email from users where auth_token = ? ', (auth_token,))
+    
+        return cur.fetchall()
+
+    def decrease_pwd_tries(self):
+        conn = self.get_connection()
+        cur = conn.cursor()
+        cur.execute('update users set tries = tries - 1 where tries > 0 ')
+        conn.commit() 
+
+    def remove_inactive_users(self):
+        conn = self.get_connection()
+        cur = conn.cursor()
+        cur.execute('delete from users where activated is NULL and created <= ? ', 
+                            (datetime.now() - timedelta(days=settings.DAYS_TO_ACTIVATE), ))
+        conn.commit() 
 

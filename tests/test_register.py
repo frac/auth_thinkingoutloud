@@ -1,17 +1,14 @@
 import unittest
 import fudge
 
-from .. import auth 
+from .. import auth
 
 
 class RegisterTest(unittest.TestCase):
     """
     See if registering works
-    """ 
-    def setUp(self):
-       pass 
+    """
 
-    
     @fudge.patch('smtplib.SMTP')
     def test_register(self, FakeSMTP):
         """
@@ -26,18 +23,17 @@ class RegisterTest(unittest.TestCase):
         password = "testpass"
         status = auth.register(login, password)
         self.assertTrue(status[0])
-        self.assertEqual(status[1],"Success")
+        self.assertEqual(status[1], "Success")
 
     def test_empty_email(self):
         """
-        Email must be filled 
+        Email must be filled
         """
         login = None
         password = "testpass"
         status = auth.register(login, password)
         self.assertFalse(status[0])
-        self.assertEqual(status[1],"Empty email")
-
+        self.assertEqual(status[1], "Empty email")
 
     def test_empty_password(self):
         """
@@ -47,7 +43,7 @@ class RegisterTest(unittest.TestCase):
         password = None
         status = auth.register(login, password)
         self.assertFalse(status[0])
-        self.assertEqual(status[1],"Empty password")
+        self.assertEqual(status[1], "Empty password")
 
     def test_minimum_password_size(self):
         """
@@ -57,10 +53,7 @@ class RegisterTest(unittest.TestCase):
         password = "testy"
         status = auth.register(login, password)
         self.assertFalse(status[0])
-        self.assertEqual(status[1],"Invalid password")
-
-
-
+        self.assertEqual(status[1], "Invalid password")
 
     @fudge.patch('smtplib.SMTP')
     def test_register_email_uniqueness(self, FakeSMTP):
@@ -75,17 +68,15 @@ class RegisterTest(unittest.TestCase):
         login = "testuser1@a.com"
         password = "testpass"
         status = auth.register(login, password)
-        self.assertEqual(status[1],"Success")
+        self.assertEqual(status[1], "Success")
         self.assertTrue(status[0])
 
         #should not create
         login = "testuser1@a.com"
         status = auth.register(login, password)
         self.assertFalse(status[0])
-        self.assertNotEqual(status[1],"Success")
-        self.assertEqual(status[1],"Fail")
-
-
+        self.assertNotEqual(status[1], "Success")
+        self.assertEqual(status[1], "Fail")
 
     def test_register_invalid_emails(self):
         """
@@ -95,7 +86,7 @@ class RegisterTest(unittest.TestCase):
         password = "testpass"
         status = auth.register(login, password)
         self.assertFalse(status[0])
-        self.assertEqual(status[1],"Invalid email")
+        self.assertEqual(status[1], "Invalid email")
 
         #need a domain and tld
         login = "testuser@"
@@ -111,12 +102,12 @@ class RegisterTest(unittest.TestCase):
         login = "testuser@.aa"
         status = auth.register(login, password)
         self.assertFalse(status[0])
-        
+
         # tld must be between 2 and 4 chars
         login = "testuser@a.a"
         status = auth.register(login, password)
         self.assertFalse(status[0])
-        
+
         # tld must be between 2 and 4 chars
         login = "testuser@a.abcde"
         status = auth.register(login, password)
@@ -126,7 +117,6 @@ class RegisterTest(unittest.TestCase):
         login = "te stuser@c.aa"
         status = auth.register(login, password)
         self.assertFalse(status[0])
-
 
     @fudge.patch('smtplib.SMTP')
     def test_register_valid_email(self, FakeSMTP):
@@ -152,14 +142,13 @@ class RegisterTest(unittest.TestCase):
         status = auth.register(login, password)
         self.assertTrue(status[0])
 
-
     def test_salt_size(self):
         """
         Get a salt, does it have the proper size
         """
         salt = auth.registering.get_salt()
 
-        self.assertEqual(len(salt),32)
+        self.assertEqual(len(salt), 32)
 
     def test_salt_uniqueness(self):
         """
@@ -168,14 +157,12 @@ class RegisterTest(unittest.TestCase):
         salt1 = auth.registering.get_salt()
         salt2 = auth.registering.get_salt()
 
-        self.assertNotEqual(salt1,salt2)
+        self.assertNotEqual(salt1, salt2)
 
     def test_salt_letters(self):
         """
-        Are all letters in the ASCII safe zone  
+        Are all letters in the ASCII safe zone
         """
         salt = auth.registering.get_salt()
-        
+
         self.assertTrue(all([32 < ord(i) < 127 for i in salt]))
-
-

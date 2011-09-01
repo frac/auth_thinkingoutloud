@@ -1,26 +1,26 @@
 import unittest
 
 from ..auth import settings
-from ..auth.dbutils import DB 
+from ..auth.dbutils import DB
 
 import os
+
 
 class DatabaseTest(unittest.TestCase):
     def setUp(self):
         settings.DATABASE_PATH = "/tmp/test.db"
         self.db = DB()
         self.assertTrue(self.db)
-        self.conn = self.db.get_connection() 
+        self.conn = self.db.get_connection()
         try:
             os.unlink(settings.DATABASE_PATH)
         except OSError:
             # it is ok to not exist
             pass
-            
+
         self.assertFalse(os.path.isfile(settings.DATABASE_PATH))
         self.db.create_database()
         self.assertTrue(os.path.isfile(settings.DATABASE_PATH))
-
 
     def test_users(self):
         """
@@ -28,10 +28,6 @@ class DatabaseTest(unittest.TestCase):
         """
         cur = self.conn.cursor()
         try:
-            cur.execute('select id, email, salt, password, created, token, activated from users')
+            cur.execute('select id, email, salt, password, created, token, activated, tries, auth_token from users')
         except self.conn.OperationalError, e:
-            self.fail("user table: %s"% e)
- 
-    
-
-
+            self.fail("user table: %s" % e)

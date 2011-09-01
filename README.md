@@ -52,10 +52,10 @@ But, I am placing all sql specific code inside a dbutils file so that later it c
 User table
 -----------
 
-Basic user data that I am storing is email, hashed password and salt.
+Basic user data that I am storing is email, hashed password, salt, creation date, a token(for activating) and activated date.
 
-Registering
------------
+Registering and Activating
+---------------------------
 
 The user provides an email that is tested for uniqueness as a database constrain. Using a database constrain assures us that the database will deal with problems like concurrency and race conditions that might occur from multiple users trying to register the same login at the same time.
 
@@ -87,6 +87,86 @@ Using SHA1 lets us be platform independent, if we used some database specific cr
 
 Also during the register process a 16 char token will be generated and sent in a email.
  
+If the token is not validated in the amount of days setted in the settings.DAYS_TO_ACTIVATE property it becomes invalid.
+
+A method that can be called by a cron process deletes invalid users
+
+Authentication
+--------------
+
+Authentication is done by email and password. Every wrong try increases a counter by one. If the number is higher than the settings.MAX_PWD_TRIES property the authentication is not done and a exception is returned.
+
+When a successful authentication is done the number of tries is reset.
+
+The authentication returns a auth_token that is used by the authorization processes
+
+A method that can be called by a cron process lowers from time to time the number of failed tries.
+
+
+Authorization
+--------------
+
+Based on the auth_token received from the authentication the system returns a True or False if the user is valid.
+
+In a web application the auth_token should be saved in a crypted cookie and send to the backend once per request or when necessary.
+
+Cleanup
+-------
+
+Cleanup is a task that should be run periodically, usually from a cron task
+
+Cleanup does two things.
+
+First it decreases the number of failed passwords attempts. So that the user can try again.
+
+Second it removes users that have not activated the account after the link expired.
+
+Usage
+======
+
+
+    import auth
+
+To create the database
+
+    db = auth.dbutils.DB()
+    db.create_database()
+
+to Create an user
+
+
+    auth.register("root@localhost.ada", "cheese")
+
+Email received:
+
+    Date: Thu,  1 Sep 2011 05:38:42 -0300 (BRT)
+    From: noreply@localhost
+    To: root@localhost.ada
+    Subject: [auth] Account Activation
+
+    Welcome! please activate your account with the code: dorjo0zevckbfwqkfpmugukme6mcwjeh
+
+To activate the account 
+    
+    auth.activate("dorjo0zevckbfwqkfpmugukme6mcwjeh")
+
+To login:
+
+    auth.authenticate("root@localhost.ada", "cheese")
+
+"HXEx8xaDO5OWzalClzED4k5amm0a780v"
+
+Returns the auth_token that you use toto check if you have authorization
+
+    auth.authorize("HXEx8xaDO5OWzalClzED4k5amm0a780v")
+
+Authorization returns True or False if the auth_token is valid
+
+The clean up can be called directly from bash
+
+    $ auth/cleanup.py
+
+
 
  
 
